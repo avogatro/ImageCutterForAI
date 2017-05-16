@@ -49,7 +49,7 @@
 ****************************************************************************/
 
 import QtQuick 2.1
-import QtMultimedia 5.0
+import QtMultimedia 5.5
 
 VideoOutput {
     source: mediaPlayer

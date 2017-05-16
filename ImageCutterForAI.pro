@@ -1,14 +1,24 @@
-QT += qml quick
+QT += qml quick multimedia gui
 
 CONFIG += c++11
 
-SOURCES += main.cpp
+SOURCES += filereader.cpp \
+    modelproject.cpp \
+    modelvideo.cpp \
+    videoframe.cpp \
+    main.cpp
+
+HEADERS += \
+    filereader.h \
+    modelproject.h \
+    modelvideo.h \
+    videoframe.h
 
 RESOURCES += qml.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
+QML_IMPORT_PATH = ..
+QML2_IMPORT_PATH
 # Additional import path used to resolve QML modules just for Qt Quick Designer
 QML_DESIGNER_IMPORT_PATH =
 
@@ -27,3 +37,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
