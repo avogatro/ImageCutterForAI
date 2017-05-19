@@ -1,18 +1,20 @@
-QT += qml quick multimedia gui
+QT += qml quick multimedia gui multimediawidgets
 
 CONFIG += c++11
 
 SOURCES += filereader.cpp \
-    modelproject.cpp \
-    modelvideo.cpp \
     videoframe.cpp \
-    main.cpp
+    main.cpp \
+    video.cpp \
+    project.cpp \
+    videoframesurface.cpp
 
 HEADERS += \
     filereader.h \
-    modelproject.h \
-    modelvideo.h \
-    videoframe.h
+    videoframe.h \
+    video.h \
+    project.h \
+    videoframesurface.h
 
 RESOURCES += qml.qrc
 

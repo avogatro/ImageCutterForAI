@@ -1,5 +1,5 @@
-#ifndef MODELPROJECT_H
-#define MODELPROJECT_H
+#ifndef PROJECT_H
+#define PROJECT_H
 
 
 class ModelProject
@@ -35,4 +35,4 @@ public:
 
 };
 
-#endif // MODELPROJECT_H
+#endif // PROJECT_H

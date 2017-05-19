@@ -1,4 +1,4 @@
-#include "modelproject.h"
+#include "project.h"
 
 ModelProject::ModelProject()
 {
