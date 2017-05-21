@@ -5,11 +5,10 @@ quint64 VideoManager::getInterval() const
     return interval;
 }
 
-void VideoManager::setInterval(const quint64 &value)
+void VideoManager::setInterval(const quint64 &interval)
 {
-
     if (interval>0)
-        this->interval = value;
+        this->interval = interval;
     else
         throw std::out_of_range ("video interval <= 0");
 }
@@ -29,25 +28,19 @@ void VideoManager::setInterval(const quint64 &value)
 VideoManager::VideoManager(quint64 interval)
 {
     myQMediaPlayer = new QMediaPlayer();
+    myQMediaPlaylist = new QMediaPlaylist(myQMediaPlayer);
+    myQMediaPlayer->setPlaylist(myQMediaPlaylist);
+    setInterval(interval);
+
     myQMediaPlayer->setVolume(100);
     myQMediaPlayer->setMuted(false);
-    myQMediaPlaylist = new QMediaPlaylist(myQMediaPlayer);
-    //myQVideoFrame = NULL;
-    //myVideoFrame = NULL;
-    myQMediaPlayer->setPlaylist(myQMediaPlaylist);
-
-    setInterval(interval);
+    timer = NULL;
 }
 
 VideoManager::~VideoManager()
 {
     delete myQMediaPlayer;
     delete myQMediaPlaylist;
-
-//    if (myQVideoFrame != NULL)
-//        delete myQVideoFrame;
-//    if (myVideoFrame != NULL)
-//        delete myVideoFrame;
 
 }
 
@@ -58,10 +51,17 @@ void VideoManager::changeVideo(QUrl url)
     myQMediaPlaylist->addMedia(url);
     myQMediaPlaylist->setCurrentIndex(1);
 }
-//TODO
-void VideoManager::addpictures(QList<QUrl> pictureList)
+
+void VideoManager::addpictures(QList<QUrl> pictures)
 {
 
+
+    stop();
+    myQMediaPlaylist->clear();
+    for (QUrl url : pictures){
+        myQMediaPlaylist->addMedia(url);
+    }
+    myQMediaPlaylist->setCurrentIndex(1);
 }
 
 
@@ -72,6 +72,9 @@ void VideoManager::setOutput(VideoFrameSurface *output)
     output->setInterval(interval);
     connect(output, SIGNAL(imageIsReady(QImage)),
                          this, SLOT(setImage(QImage)));
+
+    connect(this, SIGNAL(requestImage()),
+                         output, SLOT(createImage()));
 }
 
 
@@ -79,7 +82,7 @@ void VideoManager::setOutput(VideoFrameSurface *output)
 void VideoManager::play()
 {
     myQMediaPlayer->play();
-    qDebug() << " myQMediaPlaylist mediastatus "<<myQMediaPlaylist->mediaCount();
+    //qDebug() << " myQMediaPlaylist mediastatus "<<myQMediaPlaylist->mediaCount();
 }
 void VideoManager::stop()
 {
@@ -93,7 +96,7 @@ void VideoManager::setPosition(qint64 position)
         std::out_of_range ("video duration <=0");
     else if(position>=0 && position<myQMediaPlayer->duration()){
         myQMediaPlayer->setPosition(position);
-
+        emit requestImage();
     }else
         throw std::out_of_range ("video position out of range");
 }
@@ -107,16 +110,15 @@ void VideoManager::pause()
 
 void VideoManager::forward()
 {
-    this->pause();
+    this->myQMediaPlayer->pause();
     this->setPosition( this->myQMediaPlayer->position() + interval);
 }
+
 void VideoManager::backward()
 {
-    this->pause();
+    this->myQMediaPlayer->pause();
     this->setPosition( this->myQMediaPlayer->position() - interval);
-
 }
-
 
 QImage VideoManager::crop(const int x,const int y, const int width,const int height)
 {
@@ -124,8 +126,25 @@ QImage VideoManager::crop(const int x,const int y, const int width,const int hei
     return this->image.copy(x,y,width,height);
 }
 
-void VideoManager::setImage(QImage value)
+void VideoManager::startTimer()
 {
-    this->image = value;
-    emit imageIsReady(image);
+    if (timer != NULL){
+        timer->stop();
+        delete timer;
+    }
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(doTimerEvent()));
+    timer->start(interval);
+}
+
+void VideoManager::setImage(QImage image)
+{
+    this->image = image;
+    emit imageIsReady(this->image);
+}
+
+void VideoManager::doTimerEvent()
+{
+    this->forward();
 }

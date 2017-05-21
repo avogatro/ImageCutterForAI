@@ -5,6 +5,7 @@
 #include <QMediaPlaylist>
 #include <QVideoProbe>
 #include <QDebug>
+#include <QTimer>
 #include "videoframe.h"
 #include "videoframesurface.h"
 class VideoManager : public QObject
@@ -18,6 +19,7 @@ private:
     quint64 interval;
     QImage image;
     //VideoFrame* myVideoFrame;
+    QTimer * timer;
 public:
     ///
     /// \brief Video Constructor
@@ -70,8 +72,16 @@ public:
     /// \return
     ///
     QImage getScreenshot();
+    ///
+    /// \brief getInterval
+    /// \return interval between each screenshot taken
+    ///
     quint64 getInterval() const;
-    void setInterval(const quint64 &value);
+    ///
+    /// \brief setInterval interval between each screenshot taken
+    /// \param interval
+    ///
+    void setInterval(const quint64 &interval);
     ///
     /// \brief crop crop current frame with given data
     /// \param x x
@@ -81,11 +91,13 @@ public:
     /// \return croped Image
     ///
     QImage crop(const int x, const int y, const int width, const int height);
-
+    void startTimer();
 public slots:
-    void setImage(QImage value);
+    void setImage(QImage image);
+    void doTimerEvent();
 signals:
-    void imageIsReady(QImage value);
+    void imageIsReady(QImage image);
+    void requestImage();
 };
 
 #endif // VIDEO_H

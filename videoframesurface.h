@@ -50,7 +50,7 @@ signals:
     void imageIsReady(QImage image);
 
 public slots:
-
+    void createImage();
 private:
     QReadWriteLock readWriteLock;
     QWidget *widget;
@@ -63,7 +63,7 @@ private:
 
     int interval;
     int timestamp;
-
+    bool ifCreateImage;
     bool InvervalIsOver();
     void copyFrame(const QVideoFrame& frame);
 };

@@ -7,7 +7,7 @@ VideoFrameSurface::VideoFrameSurface(QWidget *widget,int interval, QObject *pare
     lastFrameImage = new QImage();
     timestamp = QDateTime::currentMSecsSinceEpoch();
     this->setInterval(interval);
-
+    ifCreateImage = false;
 }
 
 bool VideoFrameSurface::present(const QVideoFrame& frame)
@@ -23,14 +23,15 @@ bool VideoFrameSurface::present(const QVideoFrame& frame)
             currentFrame = frame;
 
             widget->repaint(targetRect);
-
-            if (InvervalIsOver()){
+            //if (ifCreateImage && InvervalIsOver()){
+            if (ifCreateImage){
                 if(currentFrame.map(QAbstractVideoBuffer::ReadOnly))
                 {
                     copyFrame(currentFrame);
                 }
                 currentFrame.unmap();
-                timestamp = QDateTime::currentMSecsSinceEpoch();
+                ifCreateImage = false;
+                //timestamp = QDateTime::currentMSecsSinceEpoch();
                 emit imageIsReady(QImage(*lastFrameImage));
             }
 
@@ -88,6 +89,11 @@ void VideoFrameSurface::setInterval(int value)
         interval = value;
 }
 
+void VideoFrameSurface::createImage()
+{
+    ifCreateImage = true;
+}
+
 bool VideoFrameSurface::InvervalIsOver()
 {
     int a = QDateTime::currentMSecsSinceEpoch();
@@ -105,21 +111,14 @@ bool VideoFrameSurface::InvervalIsOver()
 void VideoFrameSurface::copyFrame(const QVideoFrame& frame)
 {
     readWriteLock.lockForWrite();
-//    if ((lastScreenshot->width() != frame.width())
-//            || (lastScreenshot->height() != frame.height())){
+    delete lastFrameImage;
 
-        delete lastFrameImage;
-//        const QImage::Format imageFormat = QVideoFrame::imageFormatFromPixelFormat(frame.pixelFormat());
-//        lastScreenshot =  new QImage(frame.width(), frame.height(), imageFormat);
-//        int a =0;
-        this->lastFrameImage = new QImage(  frame.bits(),
-                                            frame.width(),
-                                            frame.height(),
-                                            frame.bytesPerLine(),
-                                            QVideoFrame::imageFormatFromPixelFormat(frame.pixelFormat())
-                                );
-//    }else
-//        memcpy(lastScreenshot->bits(), frame.bits(),frame.mappedBytes());
+    this->lastFrameImage = new QImage(  frame.bits(),
+                                        frame.width(),
+                                        frame.height(),
+                                        frame.bytesPerLine(),
+                                        QVideoFrame::imageFormatFromPixelFormat(frame.pixelFormat())
+                                        );
     readWriteLock.unlock();
 }
 
